@@ -5,7 +5,7 @@ A Swift package for communicating with Crestron control processors via the Crest
 
 ---
 
-#### _NOTICE: This module is not produced, endorsed, maintained or supported by Crestron Electronics Incorporated. 'XPanel', 'Smart Graphics' and 'SIMPL Windows' are all trademarks of Crestron. The author is not affiliated in any way with Crestron.
+#### NOTICE: This module is not produced, endorsed, maintained or supported by Crestron Electronics Incorporated. 'XPanel', 'Smart Graphics' and 'SIMPL Windows' are all trademarks of Crestron. The author is not affiliated in any way with Crestron.
 
 This Swift module was inspired by [Katherine Lenae's Python CIP client](https://github.com/klenae/python-cipclient).
 
