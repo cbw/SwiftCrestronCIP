@@ -3,13 +3,17 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		31B1BFA3F10F03CE084B9307 /* Pods_SwiftCrestronCIP_SwiftCrestronCIPTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F984E41B8C867A6E4CB3AC82 /* Pods_SwiftCrestronCIP_SwiftCrestronCIPTests.framework */; };
+		5D6F7CC1072E4810CE315B12 /* Pods_SwiftCrestronCIP.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5F727CA8FC816D03F6A96B9 /* Pods_SwiftCrestronCIP.framework */; };
 		7A4465F1259FF79400E83F8A /* SwiftCrestronCIP.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A4465E7259FF79400E83F8A /* SwiftCrestronCIP.framework */; };
 		7A4465F6259FF79400E83F8A /* SwiftCrestronCIPTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A4465F5259FF79400E83F8A /* SwiftCrestronCIPTests.swift */; };
 		7A4465F8259FF79400E83F8A /* SwiftCrestronCIP.h in Headers */ = {isa = PBXBuildFile; fileRef = 7A4465EA259FF79400E83F8A /* SwiftCrestronCIP.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		7A446604259FF7B800E83F8A /* SwiftCrestronCIP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A446603259FF7B800E83F8A /* SwiftCrestronCIP.swift */; };
+		7A446605259FF7B800E83F8A /* SwiftCrestronCIP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A446603259FF7B800E83F8A /* SwiftCrestronCIP.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -23,12 +27,19 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6E88033303F9AC3D6D48088E /* Pods-SwiftCrestronCIP.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftCrestronCIP.release.xcconfig"; path = "Target Support Files/Pods-SwiftCrestronCIP/Pods-SwiftCrestronCIP.release.xcconfig"; sourceTree = "<group>"; };
 		7A4465E7259FF79400E83F8A /* SwiftCrestronCIP.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCrestronCIP.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7A4465EA259FF79400E83F8A /* SwiftCrestronCIP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftCrestronCIP.h; sourceTree = "<group>"; };
 		7A4465EB259FF79400E83F8A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7A4465F0259FF79400E83F8A /* SwiftCrestronCIPTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftCrestronCIPTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7A4465F5259FF79400E83F8A /* SwiftCrestronCIPTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftCrestronCIPTests.swift; sourceTree = "<group>"; };
 		7A4465F7259FF79400E83F8A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7A446603259FF7B800E83F8A /* SwiftCrestronCIP.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftCrestronCIP.swift; sourceTree = "<group>"; };
+		912557B8586839210E5D352A /* Pods-SwiftCrestronCIP-SwiftCrestronCIPTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftCrestronCIP-SwiftCrestronCIPTests.release.xcconfig"; path = "Target Support Files/Pods-SwiftCrestronCIP-SwiftCrestronCIPTests/Pods-SwiftCrestronCIP-SwiftCrestronCIPTests.release.xcconfig"; sourceTree = "<group>"; };
+		B3BC85946169A879CA1123C7 /* Pods-SwiftCrestronCIP-SwiftCrestronCIPTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftCrestronCIP-SwiftCrestronCIPTests.debug.xcconfig"; path = "Target Support Files/Pods-SwiftCrestronCIP-SwiftCrestronCIPTests/Pods-SwiftCrestronCIP-SwiftCrestronCIPTests.debug.xcconfig"; sourceTree = "<group>"; };
+		B5F727CA8FC816D03F6A96B9 /* Pods_SwiftCrestronCIP.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftCrestronCIP.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED53E8ADCA811DBB8F234D13 /* Pods-SwiftCrestronCIP.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftCrestronCIP.debug.xcconfig"; path = "Target Support Files/Pods-SwiftCrestronCIP/Pods-SwiftCrestronCIP.debug.xcconfig"; sourceTree = "<group>"; };
+		F984E41B8C867A6E4CB3AC82 /* Pods_SwiftCrestronCIP_SwiftCrestronCIPTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftCrestronCIP_SwiftCrestronCIPTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5D6F7CC1072E4810CE315B12 /* Pods_SwiftCrestronCIP.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -44,18 +56,41 @@
 			buildActionMask = 2147483647;
 			files = (
 				7A4465F1259FF79400E83F8A /* SwiftCrestronCIP.framework in Frameworks */,
+				31B1BFA3F10F03CE084B9307 /* Pods_SwiftCrestronCIP_SwiftCrestronCIPTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		386B72C7C4C4E69E067D3D55 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B5F727CA8FC816D03F6A96B9 /* Pods_SwiftCrestronCIP.framework */,
+				F984E41B8C867A6E4CB3AC82 /* Pods_SwiftCrestronCIP_SwiftCrestronCIPTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		3BBC3C7BD3B42D3CDC1457C3 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				ED53E8ADCA811DBB8F234D13 /* Pods-SwiftCrestronCIP.debug.xcconfig */,
+				6E88033303F9AC3D6D48088E /* Pods-SwiftCrestronCIP.release.xcconfig */,
+				B3BC85946169A879CA1123C7 /* Pods-SwiftCrestronCIP-SwiftCrestronCIPTests.debug.xcconfig */,
+				912557B8586839210E5D352A /* Pods-SwiftCrestronCIP-SwiftCrestronCIPTests.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		7A4465DD259FF79400E83F8A = {
 			isa = PBXGroup;
 			children = (
 				7A4465E9259FF79400E83F8A /* SwiftCrestronCIP */,
 				7A4465F4259FF79400E83F8A /* SwiftCrestronCIPTests */,
 				7A4465E8259FF79400E83F8A /* Products */,
+				3BBC3C7BD3B42D3CDC1457C3 /* Pods */,
+				386B72C7C4C4E69E067D3D55 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -73,6 +108,7 @@
 			children = (
 				7A4465EA259FF79400E83F8A /* SwiftCrestronCIP.h */,
 				7A4465EB259FF79400E83F8A /* Info.plist */,
+				7A446603259FF7B800E83F8A /* SwiftCrestronCIP.swift */,
 			);
 			path = SwiftCrestronCIP;
 			sourceTree = "<group>";
@@ -104,6 +140,8 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7A4465FB259FF79400E83F8A /* Build configuration list for PBXNativeTarget "SwiftCrestronCIP" */;
 			buildPhases = (
+				998F843C93C8E552E43DD412 /* [CP] Check Pods Manifest.lock */,
+				7A758B4225B1517900DC94C4 /* ShellScript */,
 				7A4465E2259FF79400E83F8A /* Headers */,
 				7A4465E3259FF79400E83F8A /* Sources */,
 				7A4465E4259FF79400E83F8A /* Frameworks */,
@@ -122,9 +160,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7A4465FE259FF79400E83F8A /* Build configuration list for PBXNativeTarget "SwiftCrestronCIPTests" */;
 			buildPhases = (
+				D6B83201897E22A7EACB2C02 /* [CP] Check Pods Manifest.lock */,
 				7A4465EC259FF79400E83F8A /* Sources */,
 				7A4465ED259FF79400E83F8A /* Frameworks */,
 				7A4465EE259FF79400E83F8A /* Resources */,
+				710224E8C64338F98DC6DC8D /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -147,6 +187,7 @@
 				TargetAttributes = {
 					7A4465E6259FF79400E83F8A = {
 						CreatedOnToolsVersion = 12.3;
+						LastSwiftMigration = 1230;
 					};
 					7A4465EF259FF79400E83F8A = {
 						CreatedOnToolsVersion = 12.3;
@@ -189,11 +230,93 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		710224E8C64338F98DC6DC8D /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SwiftCrestronCIP-SwiftCrestronCIPTests/Pods-SwiftCrestronCIP-SwiftCrestronCIPTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SwiftCrestronCIP-SwiftCrestronCIPTests/Pods-SwiftCrestronCIP-SwiftCrestronCIPTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SwiftCrestronCIP-SwiftCrestronCIPTests/Pods-SwiftCrestronCIP-SwiftCrestronCIPTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7A758B4225B1517900DC94C4 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+		998F843C93C8E552E43DD412 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-SwiftCrestronCIP-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D6B83201897E22A7EACB2C02 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-SwiftCrestronCIP-SwiftCrestronCIPTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		7A4465E3259FF79400E83F8A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7A446604259FF7B800E83F8A /* SwiftCrestronCIP.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -201,6 +324,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7A446605259FF7B800E83F8A /* SwiftCrestronCIP.swift in Sources */,
 				7A4465F6259FF79400E83F8A /* SwiftCrestronCIPTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -268,7 +392,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -326,7 +450,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -340,7 +464,9 @@
 		};
 		7A4465FC259FF79400E83F8A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = ED53E8ADCA811DBB8F234D13 /* Pods-SwiftCrestronCIP.debug.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 5WC97HXTCQ;
@@ -357,6 +483,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.adairsystems.SwiftCrestronCIP;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -364,7 +492,9 @@
 		};
 		7A4465FD259FF79400E83F8A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6E88033303F9AC3D6D48088E /* Pods-SwiftCrestronCIP.release.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 5WC97HXTCQ;
@@ -381,6 +511,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.adairsystems.SwiftCrestronCIP;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -388,7 +519,9 @@
 		};
 		7A4465FF259FF79400E83F8A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B3BC85946169A879CA1123C7 /* Pods-SwiftCrestronCIP-SwiftCrestronCIPTests.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 5WC97HXTCQ;
 				INFOPLIST_FILE = SwiftCrestronCIPTests/Info.plist;
@@ -406,7 +539,9 @@
 		};
 		7A446600259FF79400E83F8A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 912557B8586839210E5D352A /* Pods-SwiftCrestronCIP-SwiftCrestronCIPTests.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 5WC97HXTCQ;
 				INFOPLIST_FILE = SwiftCrestronCIPTests/Info.plist;
