@@ -11,4 +11,8 @@ This Swift module was inspired by [Katherine Lenae's Python CIP client](https://
 
 This is a Swift-based socket client that facilitates communications with a Crestron control processor using the Crestron-over-IP (CIP) protocol. Familiarity with and access to Crestron's development tools, processes and terminology are required to configure the control processor in a way that allows this module to be used.
 
-Usage information, and example iOS app and Crestron program coming soon.
+---
+
+## Sample Programs
+
+The [CIPSampleApp Swift application](./CIPSampleApp) demonstrates the use of this package. See the `README` file for information on building and running. The sample app requires the counterpart [Crestron sample program](./Crestron%20Sample%20Program) to be running on a Creston control system.
