@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "SwiftCrestronCIP"
-  spec.version      = "0.0.2"
+  spec.version      = "1.0.0"
   spec.summary      = "Swift library that implements the Crestron CIP protocol."
 
   # This description is used to generate tags and improve search results.
@@ -25,10 +25,14 @@ Pod::Spec.new do |spec|
   #   * Write the description between the DESC delimiters below.
   #   * Finally, don't worry about the indent, CocoaPods strips it!
   spec.description  = <<-DESC
-TBD
+This Swift module was inspired by Katherine Lenae's Python CIP client.
+
+This is a Swift-based socket client that facilitates communications with a Crestron control processor using the Crestron-over-IP (CIP) protocol. Familiarity with and access to Crestron's development tools, processes and terminology are required to configure the control processor in a way that allows this module to be used.
+
+A sample Swift app and Crestron program are posted on GitHub.
                    DESC
 
-  spec.homepage     = "http://foo/SwiftCrestronCIP"
+  spec.homepage     = "https://github.com/cbw/SwiftCrestronCIP"
   # spec.screenshots  = "www.example.com/screenshots_1.gif", "www.example.com/screenshots_2.gif"
 
 
@@ -39,7 +43,6 @@ TBD
   #  Popular ones are 'MIT', 'BSD' and 'Apache License, Version 2.0'.
   #
 
-  # spec.license      = "MIT (example)"
   spec.license      = { :type => "MIT", :file => "LICENSE" }
 
 
@@ -54,7 +57,7 @@ TBD
   #
 
   spec.author             = { "Chris Wilson" => "chris@chrisbwilson.com" }
-  # spec.social_media_url   = "https://twitter.com/Chris Wilson"
+  spec.social_media_url   = "https://twitter.com/ChrisWilson"
 
   # ――― Platform Specifics ――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   #
@@ -62,8 +65,7 @@ TBD
   #  the deployment target. You can optionally include the target after the platform.
   #
 
-  spec.platform     = :ios
-  # spec.platform     = :ios, "5.0"
+  spec.platform     = :ios, "13.0"
 
   #  When using multiple platforms
   # spec.ios.deployment_target = "5.0"
@@ -78,8 +80,7 @@ TBD
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  #spec.source       = { :git => "http://foo.com/SwiftCrestronCIP.git", :tag => "#{spec.version}" }
-  spec.source       = { :path => '.' }
+  spec.source       = { :git => "https://github.com/cbw/SwiftCrestronCIP.git", :tag => "#{spec.version}" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
@@ -90,12 +91,7 @@ TBD
   #  Not including the public_header_files will make all headers public.
   #
 
-  #spec.source_files  = "Classes", "Classes/**/*.{h,m}"
-  #spec.exclude_files = "Classes/Exclude"
-
   spec.source_files = "SwiftCrestronCIP"
-
-  # spec.public_header_files = "Classes/**/*.h"
 
 
   # ――― Resources ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
@@ -134,6 +130,7 @@ TBD
   # spec.requires_arc = true
 
   # spec.xcconfig = { "HEADER_SEARCH_PATHS" => "$(SDKROOT)/usr/include/libxml2" }
+
   spec.dependency "CocoaAsyncSocket", "~> 7.6"
 
 end
