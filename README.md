@@ -11,7 +11,7 @@ This is a Swift-based socket client that facilitates communications with a Crest
 
 ## Sample Programs
 
-The [CIPSampleApp Swift application](./CIPSampleApp) demonstrates the use of this package. See the `README` file for information on building and running. The sample app requires the counterpart [Crestron sample program](./Crestron%20Sample%20Program) to be running on a Creston control system.
+The [CIPSampleApp Swift application](https://github.com/cbw/SwiftCrestronCIP/tree/main/CIPSampleApp) demonstrates the use of this package. See the `README` file for information on building and running. The sample app requires the counterpart [Crestron sample program](https://github.com/cbw/SwiftCrestronCIP/tree/main/Crestron%20Sample%20Program) to be running on a Creston control system.
 
 ## Usage
 
@@ -99,4 +99,4 @@ The first parameter is the join ID, and the second is a `String` value.
 
 ### Finding more information
 
-This is just a quick glance of how to use this package. For more documentation, see [SwiftCrestronCIP/SwiftCrestronCIP.swift](./blob/main/SwiftCrestronCIP/SwiftCrestronCIP.swift), and for example usage, the [CIPSampleApp Swift application](./CIPSampleApp).
+This is just a quick glance of how to use this package. For more documentation, see [SwiftCrestronCIP/SwiftCrestronCIP.swift](./blob/main/SwiftCrestronCIP/SwiftCrestronCIP.swift), and for example usage, the [CIPSampleApp Swift application](https://github.com/cbw/SwiftCrestronCIP/tree/main/CIPSampleApp).
