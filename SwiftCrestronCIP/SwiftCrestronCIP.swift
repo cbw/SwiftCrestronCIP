@@ -40,13 +40,22 @@ public enum SignalType: String {
     case serial = "S"
 }
 
-public enum DebugLevel {
-    case off
-    case moderate
-    case high
+public enum DebugLevel: Int {
+    case off = 0
+    case low = 1
+    case moderate = 2
+    case high = 3
+}
+
+public enum ConnectionState {
+    case disconnected
+    case connecting
+    case connected
+    case retrying
 }
 
 public typealias CIPSignalHandler = (_ signalType: SignalType, _ joinId: UInt16, _ value: Any) -> Void
+public typealias StateChangeHandler = (_ state: Any) -> Void
 
 /// Implements the Crestron CIP protocol, managing communication with a control processor
 public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
@@ -57,7 +66,7 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
     let host: String
 
     // Control processor TCP port
-    let port: UInt16 = 41794
+    let port: UInt16
 
     // IPID of the Xpanel device this client should use
     let ipid: UInt8
@@ -65,17 +74,28 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
     // Automatically reconnect on disconnect
     var reconnectOnDisconnect = true
 
-    // Controls the debug level. "moderate" will enable printing events, while "high" will print
-    // packet/message content
+    // Controls the debug level. "low" will print the most significant events, "moderate" will print
+    // most everything, while "high" will print full packet/message content
     public var debugLevel: DebugLevel = .off
 
-    // Tracks the TCP connection status of the socket to the control processor. This is
-    // readable publicly, but only mutable within the class
-    public private(set) var connected = false
-
+    // Tracks the state of the TCP connection to the control processor
+    public private(set) var connectionState: ConnectionState = .disconnected {
+        didSet {
+            if connectionStateChangeCallback != nil {
+                connectionStateChangeCallback!(connectionState)
+            }
+        }
+    }
+    
     // Tracks the registration status of the control processor. This is readable publicly,
     // but only mutable within the class
-    public private(set) var registered = false
+    public private(set) var registered = false {
+        didSet {
+            if registrationStateChangeCallback != nil {
+                registrationStateChangeCallback!(registered)
+            }
+        }
+    }
 
     // Timer for sending heartbeat messages to the control processor
     var heartbeatTimer: Timer?
@@ -97,6 +117,10 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
     // "D42" for digital join 42). The value is an array, allowing for more than one callback
     // per join.
     var signalCallbacks: [ String: [CIPSignalHandler] ] = [:]
+    
+    // Callbacks for when connection/registration states change
+    public var connectionStateChangeCallback: StateChangeHandler? = nil
+    public var registrationStateChangeCallback: StateChangeHandler? = nil
 
     // TCP socket for communicating with the control processor
     lazy var socket: GCDAsyncSocket = {
@@ -114,14 +138,22 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
         - withControlSystemHost: The hostname or IP address of the control system.
         - ipid: The IPID of the Xpanel this client should use.
         - port: The TCP port of the control system (defaults to 41794).
-        - debugLevel: enables debugging (defaults to `.off`)
+        - debugLevel: enables debugging (defaults to `.off`).
+        - connectionStateChangeCallback: closure to be called when  connection state changes
+        - registrationStateChangeCallback: closure to be called when the registration state changes
      */
     public init (withControlSystemHost host: String,
                  ipid: UInt8,
                  port: UInt16 = 41794,
-                 debugLevel: DebugLevel = .off) {
+                 debugLevel: DebugLevel = .off,
+                 connectionStateChangeCallback: StateChangeHandler? = nil,
+                 registrationStateChangeCallback: StateChangeHandler? = nil) {
         self.host = host
         self.ipid = ipid
+        self.port = port
+        self.debugLevel = debugLevel
+        self.connectionStateChangeCallback = connectionStateChangeCallback
+        self.registrationStateChangeCallback = registrationStateChangeCallback
     }
     
     // MARK: -
@@ -133,6 +165,15 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
      - Parameter _: The data to be sent.
      */
     private func send(_ datagram: Data) {
+        if debugLevel.rawValue >= DebugLevel.high.rawValue {
+            var byteArray: [UInt8] = [ ]
+            for byte in datagram {
+                byteArray.append(byte)
+            }
+            
+            log("[TX] bytes: \(byteArray.hexString(spacing: ", "))", level: .high)
+        }
+        
         socket.write(datagram, withTimeout: 2, tag: 0)
     }
 
@@ -145,9 +186,8 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
         - port: The port number of the connection.
      */
     public func socket(_ sock: GCDAsyncSocket, didConnectToHost host: String, port: UInt16) {
-        print("didConnectToHost \(host):\(port)\n")
-
-        connected = true
+        log("[CONNECT] didConnectToHost \(host):\(port)\n", level: .low)
+        connectionState = .connected
 
         // Cancel connect retry timer
         DispatchQueue.main.async {
@@ -167,6 +207,15 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
         - withTag: The data tag.
      */
     public func socket(_ sock: GCDAsyncSocket, didRead data: Data, withTag tag: CLong) {
+        if debugLevel.rawValue >= DebugLevel.high.rawValue {
+            var byteArray: [UInt8] = [ ]
+            for byte in data {
+                byteArray.append(byte)
+            }
+            
+            log("[RX] bytes: \(byteArray.hexString(spacing: ", "))", level: .high)
+        }
+        
         socket.readData(withTimeout: -1, tag: 0)
         processData(data)
     }
@@ -179,8 +228,8 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
         - withError: Optional error.
      */
     public func socketDidDisconnect(_ sock: GCDAsyncSocket, withError err: Error?) {
-        print("[SOCKET] Socket disconnected")
-        connected = false
+        log("[CONNECT] Socket disconnected", level: .low)
+        connectionState = .disconnected
         registered = false
 
         // Cancel the heartbeat timer
@@ -191,6 +240,7 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
 
         // If reconnect is enabled, try to reconnect after a 1 second delay
         if reconnectOnDisconnect {
+            connectionState = .retrying
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 self.connect()
             }
@@ -212,7 +262,7 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
 
         while position < length {
             if (length - position) < 4 {
-                print("RX: [Error] packet is too short")
+                log("[RX] Error: packet is too short", level: .low)
                 break
             }
 
@@ -220,7 +270,7 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
             let packetLength = payloadLength + 3
 
             if (length - position) < packetLength {
-                print("RX: [Error] Packet length mismatch")
+                log("[RX] Error: Packet length mismatch", level: .low)
                 break
             }
 
@@ -252,16 +302,17 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
      */
     public func connect(reconnectOnDisconnect: Bool = true) {
         self.reconnectOnDisconnect = reconnectOnDisconnect
+        connectionState = .connecting
 
-        if connected {
-            print("[ERROR] Called connect() when already connected")
+        if connectionState != .disconnected {
+            log("[CONNECT] Called connect() when already connected or connecting", level: .low)
         }
 
         do {
-            print("[CONNECT] Trying to connect to \(host):\(port)")
+            log("[CONNECT] Trying to connect to \(host):\(port)", level: .low)
             try socket.connect(toHost: host, onPort: port, withTimeout: 2)
         } catch let error {
-            print("[ERROR] Well that didn't go as planned... \(error)")
+            log("[CONNECT] Error while attempting to connect: \(error)", level: .low)
         }
 
         DispatchQueue.main.async {
@@ -278,7 +329,10 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
      Disconnects from the control processor.
      */
     public func disconnect() {
+        log("[CONNECT] Disconnecting socket", level: .low)
         reconnectOnDisconnect = false
+        
+        connectionState = .disconnected
         registered = false
         socket.disconnect()
     }
@@ -305,16 +359,14 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
         - callback: The closure to call when a signal is received.
      */
     public func subscribe(signalType: SignalType, joinID: UInt16, callback: @escaping CIPSignalHandler) {
-        print("Starting subscription... type: \(signalType.rawValue)")
+        log("[SIGNAL] Starting subscription... type: \(signalType.rawValue)", level: .moderate)
         let joinTypeIDString: String = String(joinID) + signalType.rawValue
         if signalCallbacks[joinTypeIDString] == nil {
-            print("Couldn't unwrap callback array")
+            log("[SIGNAL] Couldn't unwrap callback array, creating empty array", level: .moderate)
             signalCallbacks[joinTypeIDString] = [CIPSignalHandler]()
         }
 
             signalCallbacks[joinTypeIDString]!.append(callback)
-            print("CBArray: \(signalCallbacks[joinTypeIDString]!) [\(signalCallbacks.count)]")
-            print("Deep in it: \(signalCallbacks[joinTypeIDString]!.count)")
     }
     
     // MARK: -
@@ -334,8 +386,8 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
         - buttonStyle: If this is a button-style join, defaults to false.
      */
     public func setDigitalJoin(_ joinID: UInt16, high: Bool, buttonStyle: Bool = false) {
-        if !connected || !registered {
-            print("[ERROR] call to setDigitalJoin while not connected or registered")
+        if connectionState != .connected || !registered {
+            log("[ERROR] call to setDigitalJoin while not connected or registered", level: .low)
             return
         }
 
@@ -352,7 +404,7 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
             }
 
             byteArray += self.makeByteArray(from: packedJoin)
-            print("[TX/DSIG] Setting join \(joinID) to \"\(high)\" (\(byteArray.hexString(spacing: ", ")))")
+            self.log("[SIGNAL] Setting digital join \(joinID) to \"\(high)\" (\(byteArray.hexString(spacing: ", ")))", level: .moderate)
 
             self.send(Data(byteArray))
             Thread.sleep(forTimeInterval: self.txPacingDelay)
@@ -411,8 +463,8 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
         - value: UInt16 value to which the join will be set.
      */
     public func setAnalog(_ joinID: UInt16, value: UInt16) {
-        if !connected || !registered {
-            print("[ERROR] call to setAnalog while not connected or registered")
+        if connectionState != .connected || !registered {
+            log("[ERROR] call to setAnalog while not connected or registered", level: .low)
             return
         }
 
@@ -422,7 +474,7 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
 
             byteArray += self.makeByteArray(from: cipJoinID)
             byteArray += self.makeByteArray(from: value)
-            // print("[TX/ASIG] Setting join \(joinID) to \"\(value)\" (\(byteArray.hexString(spacing: ", ")))")
+            self.log("[SIGNAL] Setting analog join \(joinID) to \"\(value)\" (\(byteArray.hexString(spacing: ", ")))", level: .moderate)
 
             self.send(Data(byteArray))
             Thread.sleep(forTimeInterval: self.txPacingDelay)
@@ -441,8 +493,14 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
         - string: The string to send.
      */
     public func sendSerial(_ joinID: UInt16, string: String) {
-        if !connected || !registered {
-            print("[ERROR] call to sendSerial while not connected or registered")
+        if connectionState != .connected || !registered {
+            log("[ERROR] call to sendSerial while not connected or registered", level: .low)
+            return
+        }
+        
+        if string.count > 255 || string.count < 1 {
+            // TODO - throw this as an exception
+            log("[ERROR] Invalid string length: \(string.count)", level: .low)
             return
         }
 
@@ -455,7 +513,7 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
             byteArray += self.makeByteArray(from: cipJoinID)
             byteArray.append(UInt8(0x03))
             byteArray += string.compactMap { UInt8($0.asciiValue!) }
-            // print("[TX/SERIAL] Sending \"\(string)\" on serial join \(joinID) (\(byteArray.hexString(spacing: ", ")))")
+            self.log("[SIGNAL] Sending \"\(string)\" on serial join \(joinID) (\(byteArray.hexString(spacing: ", ")))", level: .moderate)
 
             self.send(Data(byteArray))
             Thread.sleep(forTimeInterval: self.txPacingDelay)
@@ -472,21 +530,19 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
      TODO: implement throwing an exception when a join is set while not connected and registered.
      */
     public func sendUpdateRequest() {
-        if !connected || !registered {
-            print("[ERROR] call to sendUpdateRequest while not connected or registered")
+        if connectionState != .connected || !registered {
+            log("[ERROR] call to sendUpdateRequest while not connected or registered", level: .low)
             return
         }
 
         txQueue.async {
             let byteArray: [UInt8] = [0x05, 0x00, 0x05, 0x00, 0x00, 0x02, 0x03, 0x00]
-            print("[TX/UPDATE] Sending update request (\(byteArray.hexString(spacing: ", ")))")
+            self.log("[TX] Sending update request (\(byteArray.hexString(spacing: ", ")))", level: .moderate)
 
             self.send(Data(byteArray))
             Thread.sleep(forTimeInterval: self.txPacingDelay)
         }
     }
-
-    
 
     // MARK: -
     // MARK: Timers
@@ -503,8 +559,8 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
     func fireConnectionRetryTimer(timer: Timer) {
         self.connectRetryTimer = nil
 
-        if !connected {
-            print("[CONNECT] Not connected, retrying...")
+        if connectionState != .connected {
+            log("[CONNECT] Reconnect timer expired, retrying connect()", level: .low)
             connect()
         }
     }
@@ -519,8 +575,8 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
      */
     @objc
     func fireHeartbeatTimer(timer: Timer) {
-        if !connected || !registered {
-            print("[ERROR] attempted to send heartbeat while not registered")
+        if connectionState != .connected || !registered {
+            log("[ERROR] attempted to send heartbeat while not registered", level: .low)
             return
         }
 
@@ -529,13 +585,12 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
             var datagram = Data()
             datagram.append(contentsOf: heartbeatByteArray)
 
-            // print("[TX] Sending heartbeat: \(heartbeatByteArray.hexString(spacing: ", "))")
+            self.log("[TX] Sending heartbeat: \(heartbeatByteArray.hexString(spacing: ", "))", level: .moderate)
             self.send(datagram)
             Thread.sleep(forTimeInterval: self.txPacingDelay)
         }
     }
 
-    
     // MARK: -
     // MARK: Message Processing
     
@@ -549,31 +604,26 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
         - payload: The payload data of the CIP message.
      */
     private func processPayload(packetType: UInt8, payload: Data) {
-        // print("RX: command type \(packetType)")
+        log("[RX] command type \(packetType)", level: .moderate)
 
         switch packetType {
         case 0x0D, 0x0E:
-            // print("RX: heartbeat")
+            log("[RX] Received heartbeat from processor", level: .high)
             // No action required, timer is sending outbound heartbeats
-            break
         case 0x05:
-            // print("RX: data")
             handleData(payload)
         case 0x12:
-            // print("RX: serial join")
             handleSerialJoin(payload)
         case 0x0F:
-            print("RX: registration request")
             handleRegistrationRequest()
         case 0x02:
-            print("RX: registration result")
             handleRegistrationResponse(payload)
         case 0x03:
-            print("RX: control system disconnect")
+            log("[RX] Control system sent disconnect message", level: .low)
             self.registered = false
             socket.disconnect()
         default:
-            print("RX: unknown packet")
+            log("[RX] Unknown packet type received", level: .low)
         }
     }
 
@@ -592,11 +642,11 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
     private func makeCallbacks(forJoinID joinID: UInt16, signalType: SignalType, value: Any) {
         let joinTypeIDString: String = String(joinID) + signalType.rawValue
         guard let callbacks = signalCallbacks[joinTypeIDString] else {
-            print("[CBACK] callbacks array is nil for \"\(joinTypeIDString)\"")
+            log("[SIGNAL] callbacks array is nil for \"\(joinTypeIDString)\"", level: .low)
             return
         }
 
-        // print("[CBACK] [\(joinTypeIDString)] callbacks.count=\(callbacks.count)")
+        log("[signal] Join \"\(joinTypeIDString)\" callbacks.count=\(callbacks.count)", level: .moderate)
 
         for callback in callbacks {
             callback(signalType, joinID, value)
@@ -630,22 +680,21 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
             let joinID = UInt16((((byteArray[5] & 0x7F) << 8) | byteArray[4]) + 1)
             let state: UInt8 = ((byteArray[5] & 0x80) >> 7) ^ 0x01
 
-            print("[DATA] Digital Join ID \(joinID) = \(state)")
+            log("[DATA] Digital Join ID \(joinID) = \(state)", level: .moderate)
             makeCallbacks(forJoinID: joinID, signalType: .digital, value: state == 1)
         case 0x14:
-            // print("[RX/ASIG] payload = \"\(byteArray.hexString(spacing: ", "))\"")
             let joinID = UInt16(((byteArray[4] << 8) | byteArray[5]) + 1)
             let value: UInt16 = UInt16(byteArray[6]) << 8 + UInt16(byteArray[7])
 
-            print("[DATA] Analog Join ID \(joinID) = \(value)")
+            log("[DATA] Analog Join ID \(joinID) = \(value)", level: .moderate)
             makeCallbacks(forJoinID: joinID, signalType: .analog, value: value)
         case 0x03:
-            print("[DATA] Update Request")
+            log("[DATA] Update Request", level: .moderate)
             handleUpdateRequest(byteArray)
         case 0x08:
-            print("[DATA] Received date/time from processor")
+            log("[DATA] Received date/time from processor", level: .moderate)
         default:
-            print("[DATA] Unknown data type received")
+            log("[DATA] Unknown data type received", level: .low)
         }
     }
 
@@ -666,7 +715,7 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
         let joinID = UInt16(((byteArray[5] << 8) | byteArray[6]) + 1)
         let value = String(bytes: byteArray[8...], encoding: String.Encoding.ascii)
 
-        print("[SERIAL] Serial Join ID \(joinID) = \(value!)")
+        log("[SERIAL] Serial Join ID \(joinID) = \(value!)", level: .moderate)
         makeCallbacks(forJoinID: joinID, signalType: .serial, value: value ?? "")
     }
 
@@ -687,11 +736,11 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
     private func handleUpdateRequest(_ payloadBytes: [UInt8]) {
         switch payloadBytes[4] {
         case 0x00:
-            print("[UPDATE] Standard update request")
+            log("[UPDATE] Standard update request", level: .moderate)
         case 0x16:
-            print("[UPDATE] Mysterious penultimate update-response")
+            log("[UPDATE] Mysterious penultimate update-response", level: .moderate)
         case 0x1c:
-            print("[UPDATE] End of query")
+            log("[UPDATE] End of query", level: .moderate)
 
             txQueue.async {
                 let command: [UInt8] = [0x05, 0x00, 0x05, 0x00, 0x00, 0x02, 0x03, 0x1d]
@@ -699,7 +748,7 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
                 datagram.append(contentsOf: command)
                 self.send(datagram)
                 Thread.sleep(forTimeInterval: self.txPacingDelay)
-                print("[TX] End of query response 1 of 2 sent")
+                self.log("[TX] End of query response 1 of 2 sent", level: .moderate)
             }
 
             txQueue.async {
@@ -708,12 +757,12 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
                 datagram.append(contentsOf: command)
                 self.send(datagram)
                 Thread.sleep(forTimeInterval: self.txPacingDelay)
-                print("[TX] End of query response 2 of 2 sent")
+                self.log("[TX] End of query response 2 of 2 sent", level: .moderate)
             }
         case 0x1d:
-            print("[UPDATE] End-of-query acknowledgement")
+            log("[UPDATE] End-of-query acknowledgement", level: .moderate)
         default:
-            print("[UPDATE] Unknown update request")
+            log("[UPDATE] Unknown update request", level: .low)
         }
     }
 
@@ -731,7 +780,7 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
             datagram.append(contentsOf: registrationCommand)
             self.send(datagram)
             Thread.sleep(forTimeInterval: self.txPacingDelay)
-            print("[TX] registration message sent")
+            self.log("[TX] registration message sent", level: .moderate)
         }
     }
 
@@ -753,7 +802,7 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
         }
 
         if payloadBytes.count == 3 && payloadBytes[0] == 0xff && payloadBytes[1] == 0xff && payloadBytes[2] == 0x02 {
-            print("[ERROR] Registration Error: IPID does not exist")
+            log("[REG] Registration Error: IPID does not exist", level: .low)
             socket.disconnect()
             return
         } else if payloadBytes.count == 4 &&
@@ -761,7 +810,7 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
                     payloadBytes[1] == 0x00 &&
                     payloadBytes[2] == 0x00 &&
                     payloadBytes[3] == 0x1f {
-            // DEBUG print("Registration Succeeded")
+            log("[REG] Registration Succeeded", level: .low)
 
             txQueue.async {
                 let registrationSuccessResponse: [UInt8] = [0x05, 0x00, 0x05, 0x00, 0x00, 0x02, 0x03, 0x00]
@@ -769,7 +818,8 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
                 datagram.append(contentsOf: registrationSuccessResponse)
                 self.send(datagram)
                 self.registered = true
-                // DEBUG print("[TX] registration success response sent")
+                
+                self.log("[REG] Registration success response sent", level: .moderate)
                 Thread.sleep(forTimeInterval: self.txPacingDelay)
             }
 
@@ -785,7 +835,7 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
 
             return
         } else {
-            print("[ERROR] Registration Error: unknown response (\(payloadBytes)")
+            log("[REG] Registration Error: unknown response (\(payloadBytes)", level: .low)
             socket.disconnect()
             return
         }
@@ -798,6 +848,14 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
     private func makeByteArray<T>(from value: T) -> [UInt8] where T: FixedWidthInteger {
         withUnsafeBytes(of: value.bigEndian, Array.init)
     }
-
     
+    /// Gated logging function
+    private func log(_ message: String, level: DebugLevel) {
+        if debugLevel == .off { return }
+        
+        if debugLevel.rawValue >= level.rawValue {
+            print(message)
+        }
+    }
+
 }

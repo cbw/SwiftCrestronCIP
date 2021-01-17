@@ -1,0 +1,27 @@
+PODS:
+  - CocoaAsyncSocket (7.6.5)
+  - ReSwift (6.0.0)
+  - SwiftCrestronCIP (0.0.2):
+    - CocoaAsyncSocket (~> 7.6)
+
+DEPENDENCIES:
+  - ReSwift
+  - SwiftCrestronCIP (from `../`)
+
+SPEC REPOS:
+  trunk:
+    - CocoaAsyncSocket
+    - ReSwift
+
+EXTERNAL SOURCES:
+  SwiftCrestronCIP:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
+  ReSwift: 14e6f9409fe6bdc635e588208296a01f43b959c9
+  SwiftCrestronCIP: aedbe5553985ade32834c94170efe231533a7249
+
+PODFILE CHECKSUM: c8067ea1e95267a8f3ab03fd40c009d247ccd36f
+
+COCOAPODS: 1.10.0
