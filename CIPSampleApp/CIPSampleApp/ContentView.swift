@@ -36,7 +36,7 @@ struct DigitalSignalsControl: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
-            HStack() {
+            HStack {
                 Button("Pulse 1", action: { appStore.dispatch(Digital1Pressed()) })
                 
                 Spacer()
@@ -50,8 +50,7 @@ struct DigitalSignalsControl: View {
                     .imageScale(.large)
             }
             
-            
-            HStack() {
+            HStack {
                 Button("Pulse 2", action: { appStore.dispatch(Digital2Pressed()) })
                 
                 Spacer()
@@ -87,14 +86,13 @@ struct AnalogSignalsControl: View {
                 }
             )
             
-            HStack() {
+            HStack {
                 Spacer()
                 Text(String(format: "Value: %.0f", analogVal))
                     .font(.caption)
                     
             }
             .padding(.bottom)
-            
             
             Text("Analog Join 1 Value: \(state.current.swiftAnalog1)")
                 .fontWeight(.medium)
@@ -108,7 +106,7 @@ struct SerialSignalsControl: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: nil) {
-            HStack() {
+            HStack(content: {
                 TextField(
                     "String to send",
                     text: $text
@@ -120,13 +118,14 @@ struct SerialSignalsControl: View {
                     appStore.dispatch(Serial1Send(value: text))
                     text = ""
                     self.hideKeyboard()
-                }) {
+                    
+                }, label: {
                     Image(systemName: "paperplane")
                         .font(.system(size: 20, weight: .light))
                         .imageScale(.large)
-                }
+                })
                 .buttonStyle(DefaultButtonStyle())
-            }
+            })
             .padding(.bottom)
             
             Text("Serial Join 1 Received Text").font(/*@START_MENU_TOKEN@*/.subheadline/*@END_MENU_TOKEN@*/)
@@ -167,8 +166,8 @@ struct ConnectionStatusView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                HStack() {
-                    if (state.current.connectionState == .connected) {
+                HStack {
+                    if state.current.connectionState == .connected {
                         StatusItemView(color: .green, message: "Connected")
                     } else if state.current.connectionState == .connecting || state.current.connectionState == .retrying {
                         StatusItemView(color: .yellow, message: "Connecting")
@@ -177,7 +176,7 @@ struct ConnectionStatusView: View {
                     }
                 }
                 
-                HStack() {
+                HStack {
                     if state.current.registeredWithProcessor {
                         StatusItemView(color: .green, message: "Registered")                } else {
                             StatusItemView(color: .red, message: "Not Registered")
@@ -208,8 +207,8 @@ struct ContentView: View {
             VStack(alignment: .leading) {
                 Text("Swift CIP Demo").font(.largeTitle).padding(.bottom)
 
-                ScrollView() {
-                    HStack() {
+                ScrollView {
+                    HStack {
                         Text("Signals").font(.title).padding(.bottom)
                         Spacer()
                     }
@@ -234,6 +233,5 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView().preferredColorScheme(.dark)
-        //.buttonStyle(FilledButton())
     }
 }

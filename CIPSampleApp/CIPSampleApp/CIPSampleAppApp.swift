@@ -20,29 +20,29 @@ let cipConnection = CIPConnection(withControlSystemHost: "192.168.11.2",
 // MARK: Join Number Constants
 
 private enum DigitalJoinIn: UInt16 {
-    case SwiftPress1FB = 1
-    case SwiftPress2FB = 2
+    case swiftPress1FB = 1
+    case swiftPress2FB = 2
 }
 
 private enum DigitalJoinOut: UInt16 {
-    case SwiftPress1 = 1
-    case SwiftPress2 = 2
+    case swiftPress1 = 1
+    case swiftPress2 = 2
 }
 
 private enum AnalogJoinIn: UInt16 {
-    case SwiftAnalog1 = 1
+    case swiftAnalog1 = 1
 }
 
 private enum AnalogJoinOut: UInt16 {
-    case SwiftAnalog1 = 1
+    case swiftAnalog1 = 1
 }
 
 private enum SerialJoinIn: UInt16 {
-    case SwiftSerialEcho1 = 1
+    case swiftSerialEcho1 = 1
 }
 
 private enum SerialJoinOut: UInt16 {
-    case SwiftSerial1 = 1
+    case swiftSerial1 = 1
 }
 
 // MARK: -
@@ -94,9 +94,48 @@ struct Connect: Action {
 struct Disconnect: Action {
 }
 
-
 // MARK: -
 // MARK: Redux Reducers
+
+func CIPEventReducer(action: UpdateStateFromCIPEvent, state: AppState) -> AppState {
+    var state = state
+    
+    switch action.joinType {
+    case .digital:
+        switch action.joinID {
+        case DigitalJoinIn.swiftPress1FB.rawValue:
+            if action.value as! Bool { // swiftlint:disable:this force_cast
+                state.swiftPress1 = action.value as! Bool // swiftlint:disable:this force_cast
+            } else {
+                state.swiftPress1 = false
+            }
+        case DigitalJoinIn.swiftPress2FB.rawValue:
+            if action.value as! Bool { // swiftlint:disable:this force_cast
+                state.swiftPress2 = action.value as! Bool // swiftlint:disable:this force_cast
+            } else {
+                state.swiftPress2 = false
+            }
+        default:
+            break
+        }
+    case .analog:
+        switch action.joinID {
+        case AnalogJoinIn.swiftAnalog1.rawValue:
+            state.swiftAnalog1 = action.value as! UInt16 // swiftlint:disable:this force_cast
+        default:
+            break
+        }
+    case .serial:
+        switch action.joinID {
+        case SerialJoinIn.swiftSerialEcho1.rawValue:
+            state.swiftSerialEcho1 = action.value as? String
+        default:
+            break
+        }
+    }
+    
+    return(state)
+}
 
 func appReducer(action: Action, state: AppState?) -> AppState {
     var state = state ?? AppState()
@@ -105,47 +144,15 @@ func appReducer(action: Action, state: AppState?) -> AppState {
     case _ as ReSwiftInit:
         break
     case let action as UpdateStateFromCIPEvent:
-        switch action.joinType {
-        case .digital:
-            switch action.joinID {
-            case DigitalJoinIn.SwiftPress1FB.rawValue:
-                if action.value as! Bool {
-                    state.swiftPress1 = action.value as! Bool
-                } else {
-                    state.swiftPress1 = false
-                }
-            case DigitalJoinIn.SwiftPress2FB.rawValue:
-                if action.value as! Bool {
-                    state.swiftPress2 = action.value as! Bool
-                } else {
-                    state.swiftPress2 = false
-                }
-            default:
-                break
-            }
-        case .analog:
-            switch action.joinID {
-            case AnalogJoinIn.SwiftAnalog1.rawValue:
-                state.swiftAnalog1 = action.value as! UInt16
-            default:
-                break
-            }
-        case .serial:
-            switch action.joinID {
-            case SerialJoinIn.SwiftSerialEcho1.rawValue:
-                state.swiftSerialEcho1 = action.value as? String
-            default:
-                break
-            }
-        }
+        state = CIPEventReducer(action: action, state: state)
     case _ as Digital1Pressed:
-        cipConnection.pulse(DigitalJoinOut.SwiftPress1.rawValue)
+        cipConnection.pulse(DigitalJoinOut.swiftPress1.rawValue)
     case _ as Digital2Pressed:
-        cipConnection.pulse(DigitalJoinOut.SwiftPress2.rawValue)
+        cipConnection.pulse(DigitalJoinOut.swiftPress2.rawValue)
     case let action as AnalogValue1Changed:
-        cipConnection.setAnalog(AnalogJoinOut.SwiftAnalog1.rawValue, value: action.value)
+        cipConnection.setAnalog(AnalogJoinOut.swiftAnalog1.rawValue, value: action.value)
     case let action as Serial1Send:
-        cipConnection.sendSerial(SerialJoinOut.SwiftSerial1.rawValue, string: action.value)
+        cipConnection.sendSerial(SerialJoinOut.swiftSerial1.rawValue, string: action.value)
     case let action as ConnectionStateChange:
         state.connectionState = action.value
     case let action as RegistrationStateChange:
@@ -226,19 +233,19 @@ extension ObservableState: StoreSubscriber {
 // MARK: -
 // MARK: CIP Callback Handler
 
-let genericCIPCallback: (_ signalType: SignalType, _ joinId: UInt16, _ value: Any)  -> Void = {signalType, joinID, value in
+let genericCIPCallback: (_ signalType: SignalType, _ joinId: UInt16, _ value: Any) -> Void = {signalType, joinID, value in
     appStore.dispatch(UpdateStateFromCIPEvent(joinType: signalType, joinID: joinID, value: value))
 }
 
 // MARK: -
 // MARK: Connection/registration state handlers
 
-let connectionStateCallback: (_ state: Any)  -> Void = {state in
-    appStore.dispatch(ConnectionStateChange(value: state as! ConnectionState))
+let connectionStateCallback: (_ state: Any) -> Void = { state in
+    appStore.dispatch(ConnectionStateChange(value: state as! ConnectionState)) // swiftlint:disable:this force_cast
 }
 
-let registrationStateCallback: (_ state: Any)  -> Void = {state in
-    appStore.dispatch(RegistrationStateChange(value: state as! Bool))
+let registrationStateCallback: (_ state: Any) -> Void = { state in
+    appStore.dispatch(RegistrationStateChange(value: state as! Bool)) // swiftlint:disable:this force_cast
 
 }
 
@@ -253,15 +260,15 @@ struct CIPSampleAppApp: App {
                 // Add subscriptions before connecting so that we will receive the current state
                 // during the on-connect update. This makes sure the app initializes with current
                 // data without having to request it.
-                cipConnection.subscribe(signalType: .digital, joinID: DigitalJoinIn.SwiftPress1FB.rawValue, callback: genericCIPCallback)
-                cipConnection.subscribe(signalType: .digital, joinID: DigitalJoinIn.SwiftPress2FB.rawValue, callback: genericCIPCallback)
-                cipConnection.subscribe(signalType: .analog, joinID: AnalogJoinIn.SwiftAnalog1.rawValue, callback: genericCIPCallback)
-                cipConnection.subscribe(signalType: .serial, joinID: SerialJoinIn.SwiftSerialEcho1.rawValue, callback: genericCIPCallback)
+                cipConnection.subscribe(signalType: .digital, joinID: DigitalJoinIn.swiftPress1FB.rawValue, callback: genericCIPCallback)
+                cipConnection.subscribe(signalType: .digital, joinID: DigitalJoinIn.swiftPress2FB.rawValue, callback: genericCIPCallback)
+                cipConnection.subscribe(signalType: .analog, joinID: AnalogJoinIn.swiftAnalog1.rawValue, callback: genericCIPCallback)
+                cipConnection.subscribe(signalType: .serial, joinID: SerialJoinIn.swiftSerialEcho1.rawValue, callback: genericCIPCallback)
 
                 cipConnection.connect()
                 
-                Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { timer in
-                    if (cipConnection.registered) {
+                Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { _ in
+                    if cipConnection.registered {
                         cipConnection.sendUpdateRequest()
                     }
                 }
