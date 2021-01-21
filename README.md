@@ -15,7 +15,13 @@ The [CIPSampleApp Swift application](https://github.com/cbw/SwiftCrestronCIP/tre
 
 ## Usage
 
-To use this package, first import it into your application:
+This package is available on [CocoaPods](https://cocoapods.org). Follow the getting started instructions there, and then add the SwiftCrestronCIP pod to your `Podfile`:
+
+```
+  pod 'SwiftCrestronCIP'
+```
+
+and run `pod install` to download and install the package. Make sure you open the `.xcworkspace` that CocoaPods created, then import the package into your application:
 
 ```
 import SwiftCrestronCIP
@@ -62,7 +68,11 @@ The value of the join is sent as an `Any` type, which you'll need to force cast 
 Digital joins are sent using `setDigitalJoin()`:
 
 ```
-cipConnection.setDigitalJoin(1, high: true, buttonStyle: false)
+do {
+    try cipConnection.setDigitalJoin(1, high: true, buttonStyle: false)
+} catch {
+    // Handle errors
+}
 ```
 
 The first parameter is the join ID. The `high` parameter determines the signal level (`true` to set the signal high, `false` to set it low). The optional `buttonStyle` parameter (defaults to `false`) identifies the signal as standard or button-style.
@@ -70,9 +80,13 @@ The first parameter is the join ID. The `high` parameter determines the signal l
 There are a few convenience functions for digital joins:
 
 ```
-cipConnection.press(1)
-cipConnection.release(1)
-cipConnection.pulse(1)
+do {
+    try cipConnection.press(1)
+    try cipConnection.release(1)
+    try cipConnection.pulse(1)
+} catch {
+    // Handle errors
+}
 ```
 
 These three functions send press, release, and pulse (shorthand for calling `press()` followed by `release()`) messages on the specified join number.
@@ -82,7 +96,11 @@ These three functions send press, release, and pulse (shorthand for calling `pre
 Analog joins are sent using `setAnalog()`:
 
 ```
-cipConnection.setAnalog(1, value: foo)
+do {
+    try cipConnection.setAnalog(1, value: foo)
+} catch {
+    // Handle errors
+}
 ```
 
 The first parameter is the join ID, and the second is a `UInt16` value.
@@ -92,7 +110,11 @@ The first parameter is the join ID, and the second is a `UInt16` value.
 To send strings to a serial join, use `sendSerial()`:
 
 ```
-cipConnection.sendSerial(1, string: foo)
+do {
+    cipConnection.sendSerial(1, string: foo)
+} catch {
+    // Handle errors
+}
 ```
 
 The first parameter is the join ID, and the second is a `String` value.
