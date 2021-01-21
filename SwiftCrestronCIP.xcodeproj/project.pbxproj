@@ -14,6 +14,8 @@
 		7A4465F8259FF79400E83F8A /* SwiftCrestronCIP.h in Headers */ = {isa = PBXBuildFile; fileRef = 7A4465EA259FF79400E83F8A /* SwiftCrestronCIP.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7A446604259FF7B800E83F8A /* SwiftCrestronCIP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A446603259FF7B800E83F8A /* SwiftCrestronCIP.swift */; };
 		7A446605259FF7B800E83F8A /* SwiftCrestronCIP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A446603259FF7B800E83F8A /* SwiftCrestronCIP.swift */; };
+		7A659CC925B5694200E407CB /* CIPMessageCreators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AE05FCB25B558D300F9449E /* CIPMessageCreators.swift */; };
+		7AE05FCC25B558D300F9449E /* CIPMessageCreators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AE05FCB25B558D300F9449E /* CIPMessageCreators.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,6 +37,7 @@
 		7A4465F5259FF79400E83F8A /* SwiftCrestronCIPTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftCrestronCIPTests.swift; sourceTree = "<group>"; };
 		7A4465F7259FF79400E83F8A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7A446603259FF7B800E83F8A /* SwiftCrestronCIP.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftCrestronCIP.swift; sourceTree = "<group>"; };
+		7AE05FCB25B558D300F9449E /* CIPMessageCreators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CIPMessageCreators.swift; sourceTree = "<group>"; };
 		912557B8586839210E5D352A /* Pods-SwiftCrestronCIP-SwiftCrestronCIPTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftCrestronCIP-SwiftCrestronCIPTests.release.xcconfig"; path = "Target Support Files/Pods-SwiftCrestronCIP-SwiftCrestronCIPTests/Pods-SwiftCrestronCIP-SwiftCrestronCIPTests.release.xcconfig"; sourceTree = "<group>"; };
 		B3BC85946169A879CA1123C7 /* Pods-SwiftCrestronCIP-SwiftCrestronCIPTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftCrestronCIP-SwiftCrestronCIPTests.debug.xcconfig"; path = "Target Support Files/Pods-SwiftCrestronCIP-SwiftCrestronCIPTests/Pods-SwiftCrestronCIP-SwiftCrestronCIPTests.debug.xcconfig"; sourceTree = "<group>"; };
 		B5F727CA8FC816D03F6A96B9 /* Pods_SwiftCrestronCIP.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftCrestronCIP.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -109,6 +112,7 @@
 				7A4465EA259FF79400E83F8A /* SwiftCrestronCIP.h */,
 				7A4465EB259FF79400E83F8A /* Info.plist */,
 				7A446603259FF7B800E83F8A /* SwiftCrestronCIP.swift */,
+				7AE05FCB25B558D300F9449E /* CIPMessageCreators.swift */,
 			);
 			path = SwiftCrestronCIP;
 			sourceTree = "<group>";
@@ -317,6 +321,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7A446604259FF7B800E83F8A /* SwiftCrestronCIP.swift in Sources */,
+				7AE05FCC25B558D300F9449E /* CIPMessageCreators.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -325,6 +330,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7A446605259FF7B800E83F8A /* SwiftCrestronCIP.swift in Sources */,
+				7A659CC925B5694200E407CB /* CIPMessageCreators.swift in Sources */,
 				7A4465F6259FF79400E83F8A /* SwiftCrestronCIPTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -523,7 +529,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 5WC97HXTCQ;
+				DEVELOPMENT_TEAM = FNJR347H62;
 				INFOPLIST_FILE = SwiftCrestronCIPTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -543,7 +549,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 5WC97HXTCQ;
+				DEVELOPMENT_TEAM = FNJR347H62;
 				INFOPLIST_FILE = SwiftCrestronCIPTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

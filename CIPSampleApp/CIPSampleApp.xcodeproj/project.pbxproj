@@ -100,8 +100,8 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7A758B7125B3759000DC94C4 /* Build configuration list for PBXNativeTarget "CIPSampleApp" */;
 			buildPhases = (
-				7A758B8125B3FEC700DC94C4 /* Run SwiftLint */,
 				5D00F83C6E0FC4DD2DD3C8D9 /* [CP] Check Pods Manifest.lock */,
+				7A758B8125B3FEC700DC94C4 /* Run SwiftLint */,
 				7A758B5E25B3758F00DC94C4 /* Sources */,
 				7A758B5F25B3758F00DC94C4 /* Frameworks */,
 				7A758B6025B3758F00DC94C4 /* Resources */,

@@ -17,6 +17,8 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
+// TODO - switch to OS logging framework
+
 import CocoaAsyncSocket
 
 extension Array where Element == UInt8 {
@@ -53,6 +55,16 @@ public enum ConnectionState {
     case connected
     case retrying
 }
+
+// MARK: -
+// MARK: Errors
+
+public enum CIPConnectionError: Error {
+    case notRegistered    // thrown when an attempt is made to send a signal and not connected to or
+                          // registered with the control system
+}
+
+// MARK: -
 
 public typealias CIPSignalHandler = (_ signalType: SignalType, _ joinId: UInt16, _ value: Any) -> Void
 public typealias StateChangeHandler = (_ state: Any) -> Void
@@ -119,8 +131,8 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
     var signalCallbacks: [ String: [CIPSignalHandler] ] = [:]
     
     // Callbacks for when connection/registration states change
-    public var connectionStateChangeCallback: StateChangeHandler? = nil
-    public var registrationStateChangeCallback: StateChangeHandler? = nil
+    public var connectionStateChangeCallback: StateChangeHandler?
+    public var registrationStateChangeCallback: StateChangeHandler?
 
     // TCP socket for communicating with the control processor
     lazy var socket: GCDAsyncSocket = {
@@ -266,7 +278,7 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
                 break
             }
 
-            let payloadLength = UInt16(data[position + 1] << 8) + UInt16(data[position + 2])
+            let payloadLength = UInt16(data[position + 1]) << 8 + UInt16(data[position + 2])
             let packetLength = payloadLength + 3
 
             if (length - position) < packetLength {
@@ -378,35 +390,21 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
      This function sets a digital join high or low, and supports standard or button-style joins. If the control processor is not
      connected and registered, it will silently fail.
      
-     TODO: implement throwing an exception when a join is set while not connected and registered.
-     
      - Parameters:
         - _: The join ID of the signal.
         - high: Boolean value of if the signal should be set high (will be set low if false).
         - buttonStyle: If this is a button-style join, defaults to false.
      */
-    public func setDigitalJoin(_ joinID: UInt16, high: Bool, buttonStyle: Bool = false) {
+    public func setDigitalJoin(_ joinID: UInt16, high: Bool, buttonStyle: Bool = false) throws {
         if connectionState != .connected || !registered {
-            log("[ERROR] call to setDigitalJoin while not connected or registered", level: .low)
-            return
+            throw CIPConnectionError.notRegistered
         }
 
+        let data = try CIPMessage.makeDigitalJoinMessage(onJoinID: joinID, setHigh: high, buttonStyle: buttonStyle)
+
         txQueue.async {
-            let cipJoinID = joinID - 1
-            var byteArray: [UInt8] = [0x05, 0x00, 0x06, 0x00, 0x00, 0x03, 0x00]
-
-            if buttonStyle { byteArray[6] = 0x27 }
-
-            var packedJoin = (cipJoinID / 256) + ((cipJoinID % 256) * 256)
-
-            if !high {
-                packedJoin |= 0x80
-            }
-
-            byteArray += self.makeByteArray(from: packedJoin)
-            self.log("[SIGNAL] Setting digital join \(joinID) to \"\(high)\" (\(byteArray.hexString(spacing: ", ")))", level: .moderate)
-
-            self.send(Data(byteArray))
+            self.log("[SIGNAL] Setting digital join \(joinID) to \"\(high)\"", level: .moderate)
+            self.send(data)
             Thread.sleep(forTimeInterval: self.txPacingDelay)
         }
     }
@@ -415,13 +413,11 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
      Sets a button-style digital join high (press).
      
      This is a shorthand function for setting a button-style digital join high.
-     
-     TODO: implement throwing an exception when a join is set while not connected and registered.
-     
+
      - Parameter _: The join ID of the signal.
      */
-    public func press(_ joinID: UInt16) {
-        setDigitalJoin(joinID, high: true, buttonStyle: true)
+    public func press(_ joinID: UInt16) throws {
+        try setDigitalJoin(joinID, high: true, buttonStyle: true)
     }
 
     /**
@@ -429,12 +425,10 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
      
      This is a shorthand function for setting a button-style digital join low.
      
-     TODO: implement throwing an exception when a join is set while not connected and registered.
-     
      - Parameter _: The join ID of the signal.
      */
-    public func release(_ joinID: UInt16) {
-        setDigitalJoin(joinID, high: false, buttonStyle: true)
+    public func release(_ joinID: UInt16) throws {
+        try setDigitalJoin(joinID, high: false, buttonStyle: true)
     }
 
     /**
@@ -442,13 +436,11 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
      
      This is a shorthand function for setting a digital join high then low.
      
-     TODO: implement throwing an exception when a join is set while not connected and registered.
-     
      - Parameter _: The join ID of the signal.
      */
-    public func pulse(_ joinID: UInt16) {
-        press(joinID)
-        release(joinID)
+    public func pulse(_ joinID: UInt16) throws {
+        try press(joinID)
+        try release(joinID)
     }
 
     /**
@@ -456,27 +448,20 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
      
      This function sets an analog join to the specified value. If the control processor is not connected and registered, it will silently fail.
      
-     TODO: implement throwing an exception when a join is set while not connected and registered.
-     
      - Parameters:
         - _: The join ID of the signal.
         - value: UInt16 value to which the join will be set.
      */
-    public func setAnalog(_ joinID: UInt16, value: UInt16) {
+    public func setAnalog(_ joinID: UInt16, value: UInt16) throws {
         if connectionState != .connected || !registered {
-            log("[ERROR] call to setAnalog while not connected or registered", level: .low)
-            return
+            throw CIPConnectionError.notRegistered
         }
 
+        let data = try CIPMessage.makeAnalogJoinMessage(onJoinID: joinID, value: value)
+
         txQueue.async {
-            let cipJoinID = joinID - 1
-            var byteArray: [UInt8] = [0x05, 0x00, 0x08, 0x00, 0x00, 0x05, 0x14]
-
-            byteArray += self.makeByteArray(from: cipJoinID)
-            byteArray += self.makeByteArray(from: value)
-            self.log("[SIGNAL] Setting analog join \(joinID) to \"\(value)\" (\(byteArray.hexString(spacing: ", ")))", level: .moderate)
-
-            self.send(Data(byteArray))
+            self.log("[SIGNAL] Setting analog join \(joinID) to \"\(value)\"", level: .moderate)
+            self.send(data)
             Thread.sleep(forTimeInterval: self.txPacingDelay)
         }
     }
@@ -485,37 +470,21 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
      Sends a serial join.
      
      This function sends a string to a serial join. If the control processor is not connected and registered, it will silently fail.
-     
-     TODO: implement throwing an exception when a join is set while not connected and registered.
-     
+
      - Parameters:
         - _: The join ID of the signal.
         - string: The string to send.
      */
-    public func sendSerial(_ joinID: UInt16, string: String) {
+    public func sendSerial(_ joinID: UInt16, string: String) throws {
         if connectionState != .connected || !registered {
-            log("[ERROR] call to sendSerial while not connected or registered", level: .low)
-            return
+            throw CIPConnectionError.notRegistered
         }
-        
-        if string.count > 255 || string.count < 1 {
-            // TODO - throw this as an exception
-            log("[ERROR] Invalid string length: \(string.count)", level: .low)
-            return
-        }
+
+        let data = try CIPMessage.makeSerialJoinMessage(onJoinID: joinID, value: string)
 
         txQueue.async {
-            let cipJoinID = joinID - 1
-            var byteArray: [UInt8] = [0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x34]
-
-            byteArray[2] = UInt8(8 + string.count)
-            byteArray[6] = UInt8(4 + string.count)
-            byteArray += self.makeByteArray(from: cipJoinID)
-            byteArray.append(UInt8(0x03))
-            byteArray += string.compactMap { UInt8($0.asciiValue!) }
-            self.log("[SIGNAL] Sending \"\(string)\" on serial join \(joinID) (\(byteArray.hexString(spacing: ", ")))", level: .moderate)
-
-            self.send(Data(byteArray))
+            self.log("[SIGNAL] Sending \"\(string)\" on serial join \(joinID)", level: .moderate)
+            self.send(data)
             Thread.sleep(forTimeInterval: self.txPacingDelay)
         }
     }
@@ -526,13 +495,10 @@ public class CIPConnection: NSObject, GCDAsyncSocketDelegate {
      This function sends an update request to the control processor, which will cause it to refresh the current state of all joins
      configured for this IPID's Xpanel symbol. If the control processor is not connected and registered, this function will
      silently fail.
-     
-     TODO: implement throwing an exception when a join is set while not connected and registered.
      */
-    public func sendUpdateRequest() {
+    public func sendUpdateRequest() throws {
         if connectionState != .connected || !registered {
-            log("[ERROR] call to sendUpdateRequest while not connected or registered", level: .low)
-            return
+            throw CIPConnectionError.notRegistered
         }
 
         txQueue.async {

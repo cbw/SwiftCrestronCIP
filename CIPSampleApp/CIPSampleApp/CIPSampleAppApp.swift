@@ -12,7 +12,7 @@ import ReSwift
 // Connection to the control system
 let cipConnection = CIPConnection(withControlSystemHost: "192.168.11.2",
                                   ipid: 0x1F,
-                                  debugLevel: .low,
+                                  debugLevel: .high,
                                   connectionStateChangeCallback: connectionStateCallback,
                                   registrationStateChangeCallback: registrationStateCallback)
 
@@ -146,13 +146,29 @@ func appReducer(action: Action, state: AppState?) -> AppState {
     case let action as UpdateStateFromCIPEvent:
         state = CIPEventReducer(action: action, state: state)
     case _ as Digital1Pressed:
-        cipConnection.pulse(DigitalJoinOut.swiftPress1.rawValue)
+        do {
+            try cipConnection.pulse(DigitalJoinOut.swiftPress1.rawValue)
+        } catch {
+            print("UH OH") // TODO something saner
+        }
     case _ as Digital2Pressed:
-        cipConnection.pulse(DigitalJoinOut.swiftPress2.rawValue)
+        do {
+            try cipConnection.pulse(DigitalJoinOut.swiftPress2.rawValue)
+        } catch {
+            print("UH OH") // TODO something saner
+        }
     case let action as AnalogValue1Changed:
-        cipConnection.setAnalog(AnalogJoinOut.swiftAnalog1.rawValue, value: action.value)
+        do {
+            try cipConnection.setAnalog(AnalogJoinOut.swiftAnalog1.rawValue, value: action.value)
+        } catch {
+            print("UH OH") // TODO something saner
+        }
     case let action as Serial1Send:
-        cipConnection.sendSerial(SerialJoinOut.swiftSerial1.rawValue, string: action.value)
+        do {
+            try cipConnection.sendSerial(SerialJoinOut.swiftSerial1.rawValue, string: action.value)
+        } catch {
+            print("UH OH") // TODO something saner
+        }
     case let action as ConnectionStateChange:
         state.connectionState = action.value
     case let action as RegistrationStateChange:
@@ -269,7 +285,11 @@ struct CIPSampleAppApp: App {
                 
                 Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { _ in
                     if cipConnection.registered {
-                        cipConnection.sendUpdateRequest()
+                        do {
+                            try cipConnection.sendUpdateRequest()
+                        } catch {
+                            print("Caught an error when calling cipConnection.sendUpdateRequest()")
+                        }
                     }
                 }
             })
